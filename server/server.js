@@ -5,12 +5,14 @@ import bodyParser from 'body-parser'
 import sockjs from 'sockjs'
 import { renderToStaticNodeStream } from 'react-dom/server'
 import React from 'react'
+import axios from 'axios'  
 
 import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
 
 const Root = () => ''
+const { readFile, writeFile, unlink } = require('fs').promises
 
 try {
   // eslint-disable-next-line import/no-unresolved
@@ -40,6 +42,97 @@ const middleware = [
 ]
 
 middleware.forEach((it) => server.use(it))
+
+// headers for requests
+
+server.use((req, res, next) => {
+  res.set('x-skillcrucial-user', 'd3f71027-b686-4134-8567-8ce38f5e923f')  
+  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
+  next()
+})
+
+// HW task1 API
+function readingFile(data) {
+  return JSON.parse(data)
+}
+
+async function addToFile(fileName, data) {
+  writeFile(`${__dirname}${fileName}`, JSON.stringify(data), { encoding: "utf8" }, (err) => console.log(err))
+}
+
+server.get('/api/v1/users', (req, res) => {
+  readFile(`${__dirname}/users.json`)  
+      .then(data => res.json(readingFile(data)))
+        .catch(async () => {
+          const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
+          const data2 = addToFile('/users.json', users) 
+          res.json(data2)
+        }
+        ) 
+})
+
+server.post('/api/v1/users', (req, res) => {
+  readFile(`${__dirname}/users.json`)
+    .then(async (data) => {
+      const users = readingFile(data)
+      const lastId = users[users.length - 1].id
+      const { data: newUser } = await axios(`https://jsonplaceholder.typicode.com/users/5`)
+      const {id, ...body} = newUser
+      const newUsers = [...users, {id: lastId + 1, ...body}]
+      return newUsers
+    })
+    .then(data => {
+      addToFile('/users.json', data)
+      const { id } = data[data.length - 1]
+      res.json( {status: 'success', id})
+    })
+})
+
+server.patch('/api/v1/users/:userId', (req, res) => {
+  const { userId } = req.params
+  readFile(`${__dirname}/users.json`)
+    .then(async (data) => {
+      const users = readingFile(data)
+      const { data: newUser } = await axios(`https://jsonplaceholder.typicode.com/users/7`)
+      const {id, ...body} = newUser
+      const newUsers = [...users, {id: +userId, ...body}]
+      console.log(userId)
+      return newUsers
+    })
+    .then(data => {
+      addToFile('/users.json', data)
+      res.json({status: 'success', userId})
+    })
+})
+
+server.delete('/api/v1/users/:userId', (req, res) => {
+  const { userId } = req.params
+  readFile(`${__dirname}/users.json`)
+    .then(data => {
+      const jsonData = readingFile(data)
+      const reducedData = jsonData.filter((user) => user.id !== +userId)
+      return reducedData
+    })
+    .then(newData => {
+      addToFile('/users.json', newData)
+      res.json({status: 'success', userId})
+    })
+})
+
+server.delete('/api/v1/users/', () => {
+  unlink(`${__dirname}/users.json`)
+})
+
+
+server.get('/api/v1/user/:name', (req, res) => { 
+  const { name } = req.params
+  res.json(name)
+})  
+
+server.get('/api/v1/links/', async (req, res) => {
+  const { data: todos } = await axios('https://jsonplaceholder.typicode.com/posts/5')
+  res.json(todos)
+})
 
 server.use('/api/', (req, res) => {
   res.status(404)

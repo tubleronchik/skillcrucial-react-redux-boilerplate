@@ -90,11 +90,13 @@ server.post('/api/v1/users', (req, res) => {
 server.patch('/api/v1/users/:userId', (req, res) => {
   const { userId } = req.params
   readFile(`${__dirname}/users.json`)
-    .then(async (data) => {
+    .then((data) => {
       const users = readingFile(data)
       const { id, ...body } = req.body
-      const newUsers = [...users, {id: +userId, ...body}]
-      return newUsers
+      const newArr = users.reduce((acc, user) => {
+        return user.id === +userId ? [acc, {id: +userId, ...body}] : [...acc, user]
+      })
+      return newArr
     })
     .then(data => {
       addToFile('/users.json', data)

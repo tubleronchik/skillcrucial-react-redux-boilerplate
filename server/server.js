@@ -73,18 +73,16 @@ server.get('/api/v1/users', (req, res) => {
 
 server.post('/api/v1/users', (req, res) => {
   readFile(`${__dirname}/users.json`)
-    .then(async (data) => {
+    .then((data) => {
       const users = readingFile(data)
       const lastId = users[users.length - 1].id
-      const { data: newUser } = await axios(`https://jsonplaceholder.typicode.com/users/5`)
-      const {id, ...body} = newUser
+      const { id, ...body } = req.body
       const newUsers = [...users, {id: lastId + 1, ...body}]
       return newUsers
     })
     .then(data => {
       addToFile('/users.json', data)
       const { id } = data[data.length - 1]
-      // console.log(req.body)
       res.json( {status: 'success', id})
     })
 })
@@ -94,8 +92,7 @@ server.patch('/api/v1/users/:userId', (req, res) => {
   readFile(`${__dirname}/users.json`)
     .then(async (data) => {
       const users = readingFile(data)
-      const { data: newUser } = await axios(`https://jsonplaceholder.typicode.com/users/7`)
-      const {id, ...body} = newUser
+      const { id, ...body } = req.body
       const newUsers = [...users, {id: +userId, ...body}]
       return newUsers
     })

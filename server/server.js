@@ -121,7 +121,7 @@ server.delete('/api/v1/users/:userId', (req, res) => {
 
 server.delete('/api/v1/users/', (req,res) => {
   unlink(`${__dirname}/users.json`)
-  res.status(200)
+  res.json({status: 'success'})
 })
 
 

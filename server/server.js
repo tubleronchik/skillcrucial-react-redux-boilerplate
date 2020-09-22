@@ -56,8 +56,8 @@ function readingFile(data) {
   return JSON.parse(data)
 }
 
-async function addToFile(fileName, data) {
-  writeFile(`${__dirname}${fileName}`, JSON.stringify(data), { encoding: "utf8" }, (err) => console.log(err))
+ function addToFile(fileName, data) {
+  return writeFile(`${__dirname}${fileName}`, JSON.stringify(data), { encoding: "utf8" }, (err) => console.log(err))
 }
 
 server.get('/api/v1/users', (req, res) => {
@@ -65,8 +65,8 @@ server.get('/api/v1/users', (req, res) => {
       .then(data => res.json(readingFile(data)))
         .catch(async () => {
           const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
-          const data2 = addToFile('/users.json', users) 
-          res.json(data2)
+          addToFile('/users.json', users) 
+          res.json(users)
         }
         ) 
 })
@@ -84,6 +84,7 @@ server.post('/api/v1/users', (req, res) => {
     .then(data => {
       addToFile('/users.json', data)
       const { id } = data[data.length - 1]
+      // console.log(req.body)
       res.json( {status: 'success', id})
     })
 })
@@ -96,7 +97,6 @@ server.patch('/api/v1/users/:userId', (req, res) => {
       const { data: newUser } = await axios(`https://jsonplaceholder.typicode.com/users/7`)
       const {id, ...body} = newUser
       const newUsers = [...users, {id: +userId, ...body}]
-      console.log(userId)
       return newUsers
     })
     .then(data => {

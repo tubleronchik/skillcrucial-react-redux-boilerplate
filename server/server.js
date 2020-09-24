@@ -76,7 +76,7 @@ server.post('/api/v1/users', (req, res) => {
   readFile(`${__dirname}/users.json`)
     .then((data) => {
       const users = readingFile(data)
-      const lastId = users[users.length - 1].id
+      const lastId = (users.length === 0) ? 1 : users[users.length - 1].id
       const { id, ...body } = req.body
       const newUsers = [...users, {id: lastId + 1, ...body}]
       return newUsers

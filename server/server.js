@@ -94,7 +94,7 @@ server.patch('/api/v1/users/:userId', (req, res) => {
       const users = readingFile(data)
       const { id, ...body } = req.body
       const newArr = users.reduce((acc, user) => {
-        return user.id === +userId ? [acc, {id: +userId, ...body}] : [...acc, user]
+        return user.id === +userId ? [...acc, {id: +userId, ...body}] : [...acc, user]
       }, [])
       return newArr
     })

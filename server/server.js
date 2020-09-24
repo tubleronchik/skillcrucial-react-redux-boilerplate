@@ -95,10 +95,14 @@ server.patch('/api/v1/users/:userId', (req, res) => {
       const { id, ...body } = req.body
       const newArr = users.reduce((acc, user) => {
         return user.id === +userId ? [acc, {id: +userId, ...body}] : [...acc, user]
-      })
-      addToFile('/users.json', newArr)
-      res.json({status: 'success', userId})
+      }, [])
+      return newArr
     })
+    .then(data => {
+      addToFile('/users.json', data)
+      // res.json({status: 'success', userId})
+    })
+  res.json({status: 'success', userId})
 })
 
 server.delete('/api/v1/users/:userId', (req, res) => {

@@ -57,6 +57,7 @@ function readingFile(data) {
 }
 
  function addToFile(fileName, data) {
+  data.sort((a, b) => a.id - b.id)
   return writeFile(`${__dirname}${fileName}`, JSON.stringify(data), { encoding: "utf8" }, (err) => console.log(err))
 }
 

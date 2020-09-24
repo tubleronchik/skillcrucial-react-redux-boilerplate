@@ -100,9 +100,8 @@ server.patch('/api/v1/users/:userId', (req, res) => {
     })
     .then(data => {
       addToFile('/users.json', data)
-      // res.json({status: 'success', userId})
+      res.json({status: 'success', userId})
     })
-  res.json({status: 'success', userId})
 })
 
 server.delete('/api/v1/users/:userId', (req, res) => {

@@ -57,12 +57,11 @@ function readingFile(data) {
 }
 
  function addToFile(fileName, data) {
-  data.sort((a, b) => a.id - b.id)
   return writeFile(`${__dirname}${fileName}`, JSON.stringify(data), { encoding: "utf8" }, (err) => console.log(err))
 }
 
-server.get('/api/v1/users', (req, res) => {
-  readFile(`${__dirname}/users.json`)  
+server.get('/api/v1/users', async (req, res) => {
+  await readFile(`${__dirname}/users.json`)  
       .then(data => res.json(readingFile(data)))
         .catch(async () => {
           const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
@@ -72,8 +71,8 @@ server.get('/api/v1/users', (req, res) => {
         ) 
 })
 
-server.post('/api/v1/users', (req, res) => {
-  readFile(`${__dirname}/users.json`)
+server.post('/api/v1/users', async (req, res) => {
+  await readFile(`${__dirname}/users.json`)
     .then((data) => {
       const users = readingFile(data)
       const lastId = (users.length === 0) ? 1 : users[users.length - 1].id
@@ -88,14 +87,14 @@ server.post('/api/v1/users', (req, res) => {
     })
 })
 
-server.patch('/api/v1/users/:userId', (req, res) => {
+server.patch('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
-  readFile(`${__dirname}/users.json`)
+  await readFile(`${__dirname}/users.json`)
     .then((data) => {
       const users = readingFile(data)
       const { id, ...body } = req.body
       const newArr = users.reduce((acc, user) => {
-        return user.id === +userId ? [...acc, {id: +userId, ...body}] : [...acc, user]
+        return user.id === +userId ? [...acc, {...user, ...body}] : [...acc, user]
       }, [])
       return newArr
     })
@@ -105,9 +104,9 @@ server.patch('/api/v1/users/:userId', (req, res) => {
     })
 })
 
-server.delete('/api/v1/users/:userId', (req, res) => {
+server.delete('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
-  readFile(`${__dirname}/users.json`)
+  await readFile(`${__dirname}/users.json`)
     .then(data => {
       const jsonData = readingFile(data)
       const reducedData = jsonData.filter((user) => user.id !== +userId)
